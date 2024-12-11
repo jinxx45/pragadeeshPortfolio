@@ -74,7 +74,7 @@ const Navbar = () => {
       <div className="md:hidden lg:flex xl:w-1/5 xl:justify-center">
         <Link
           href="/"
-          className="text-sm bg-blue-500 rounded-md p-1 font-semibold flex items-center justify-center"
+          className="text-sm bg-black rounded-md p-1 font-semibold flex items-center justify-center"
         >
           <span className="text-white mr-1">Pragadeesh</span>
           <span className="w-16 h-8 rounded bg-white text-black flex items-center justify-center">
@@ -111,17 +111,17 @@ const Navbar = () => {
           <motion.div
             variants={topVariants}
             animate={open ? "opened" : "closed"}
-            className="w-10 h-1 bg-blue-500 rounded origin-left"
+            className="w-10 h-1 bg-black rounded origin-left"
           ></motion.div>
           <motion.div
             variants={centerVariants}
             animate={open ? "opened" : "closed"}
-            className="w-10 h-1 bg-blue-500 rounded"
+            className="w-10 h-1 bg-black ounded"
           ></motion.div>
           <motion.div
             variants={bottomVariants}
             animate={open ? "opened" : "closed"}
-            className="w-10 h-1 bg-blue-500 rounded origin-left"
+            className="w-10 h-1 bg-black rounded origin-left"
           ></motion.div>
         </button>
         {/* MENU LIST */}
@@ -130,7 +130,7 @@ const Navbar = () => {
             variants={listVariants}
             initial="closed"
             animate="opened"
-            className="absolute top-0 left-0 w-screen h-screen bg-blue-400 text-white flex flex-col items-center justify-center gap-8 text-4xl z-40"
+            className="absolute top-0 left-0 w-screen h-screen bg-black text-white flex flex-col items-center justify-center gap-8 text-4xl z-40"
           >
             {links.map((link) => (
               <motion.div
