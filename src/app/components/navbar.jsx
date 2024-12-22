@@ -9,12 +9,15 @@ import { motion } from "framer-motion";
 const links = [
   { url: "/", title: "Home" },
   { url: "/skills", title: "Skills" },
-  { url: "/projects", title: "Projects" },
   { url: "/contact", title: "Contact" },
 ];
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);
+
+  const handleLinkClick = () => {
+    setOpen(false); // Close the menu when any link is clicked
+  };
 
   const topVariants = {
     closed: {
@@ -85,22 +88,23 @@ const Navbar = () => {
       {/* LINKS */}
       <div className="hidden md:flex gap-4 w-3/5 flex items-center justify-center">
         {links.map((link) => (
-          <NavLink link={link} key={link.title} />
+          <NavLink link={link} key={link.title} onlinkClick={handleLinkClick} />
         ))}
       </div>
 
       {/* SOCIAL */}
       <div className="hidden md:flex gap-4 w-1/5">
-        <Link href="/">
+        <Link href="https://github.com/jinxx45/">
           <Image src="/github.png" alt="" width={24} height={24} />
         </Link>
-        <Link href="/">
+        <Link href="https://www.linkedin.com/in/pragadeeshvarans/">
           <Image src="/linkedin.png" alt="" width={24} height={24} />
         </Link>
-        <Link href="/">
+        <Link href="https://www.instagram.com/_.jinx_45/">
           <Image src="/instagram.png" alt="" width={24} height={24} />
         </Link>
       </div>
+
       {/* RESPONSIVE MENU */}
       <div className="md:hidden">
         {/* MENU BUTTON */}
@@ -116,7 +120,7 @@ const Navbar = () => {
           <motion.div
             variants={centerVariants}
             animate={open ? "opened" : "closed"}
-            className="w-10 h-1 bg-black ounded"
+            className="w-10 h-1 bg-black rounded"
           ></motion.div>
           <motion.div
             variants={bottomVariants}
@@ -124,21 +128,31 @@ const Navbar = () => {
             className="w-10 h-1 bg-black rounded origin-left"
           ></motion.div>
         </button>
+
         {/* MENU LIST */}
         {open && (
           <motion.div
             variants={listVariants}
             initial="closed"
             animate="opened"
-            className="absolute top-0 left-0 w-screen h-screen bg-black text-white flex flex-col items-center justify-center gap-8 text-4xl z-40"
+            className="absolute top-0 left-0 w-screen h-screen bg-black text-white flex flex-col items-center justify-center gap-8 text-4xl z-50"
           >
+            {/* CLOSE BUTTON (X) */}
+            <button
+              className="absolute top-4 right-4 text-white text-4xl"
+              onClick={() => setOpen(false)}
+            >
+              X
+            </button>
+
             {links.map((link) => (
               <motion.div
                 variants={listItemVariants}
                 className=""
                 key={link.title}
               >
-                <Link href={link.url}>{link.title}</Link>
+                {/* Pass onClick to NavLink for mobile menu */}
+                <NavLink link={link} onlinkClick={handleLinkClick} />
               </motion.div>
             ))}
           </motion.div>
