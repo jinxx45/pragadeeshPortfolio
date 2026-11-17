@@ -63,12 +63,37 @@ export const projects = [
 ];
 
 export const skills = [
-  ["AI", "LangGraph, LangChain, LangSmith, Spring AI, MCP, RAG, ReAct agents, LLM evals, Claude"],
-  ["Backend", "Java, Python, Spring Boot, FastAPI, Kafka, microservices, Elasticsearch"],
-  ["Frontend", "TypeScript, React, Angular, Next.js, Redux, Tailwind, Chrome extensions"],
-  ["Data", "PostgreSQL, MySQL, Oracle, MongoDB, OpenSearch"],
-  ["Cloud & ops", "AWS (EC2, S3, DynamoDB, Bedrock), GCP, Azure, Docker, Kubernetes, Helm, Jenkins"],
+  {
+    group: "AI & agents",
+    note: "What I use to build the Workday support agent and my side projects.",
+    items: ["LangGraph", "LangChain", "LangSmith", "Spring AI", "MCP", "RAG", "ReAct agents", "LLM evals", "Claude on Bedrock", "OpenSearch vector search"],
+  },
+  {
+    group: "Backend",
+    note: "Services that stay up under load.",
+    items: ["Java", "Spring Boot", "Python", "FastAPI", "Kafka", "Microservices", "REST APIs", "Elasticsearch", "Node.js"],
+  },
+  {
+    group: "Frontend",
+    note: "Interfaces people use every day.",
+    items: ["TypeScript", "React", "Angular", "Next.js", "Redux", "Tailwind CSS", "Chrome extensions"],
+  },
+  {
+    group: "Data",
+    note: "Relational first, NoSQL when it fits.",
+    items: ["PostgreSQL", "MySQL", "Oracle SQL", "PL/SQL", "MongoDB", "DynamoDB"],
+  },
+  {
+    group: "Cloud & DevOps",
+    note: "Shipping and running it.",
+    items: ["AWS", "GCP", "Azure", "Docker", "Kubernetes", "Helm", "Jenkins", "CI/CD", "Grafana"],
+  },
 ];
 
-export const recognition =
-  "Second prize in Workday's company-wide AI hackathon, for ranking test cases by the code that changed so regressions show up early in CI.";
+export const facts = [
+  ["Role", "SDE 2, Full Stack & AI Engineer at Workday"],
+  ["Focus", "AI agents, MCP servers, microservices"],
+  ["Stack", "Java, Python, TypeScript, React, Angular"],
+  ["Experience", "Nearly 5 years"],
+  ["Location", "Chennai, India"],
+];
