@@ -3,10 +3,12 @@ export const profile = {
   role: "Full stack & AI engineer",
   location: "Chennai, India",
   email: "pragadeeshh45@gmail.com",
+  phone: "+919384978015",
+  phoneLabel: "+91 93849 78015",
   linkedin: "https://www.linkedin.com/in/pragadeeshvarans/",
   github: "https://github.com/jinxx45",
   intro:
-    "I build agents that do real work. At Workday I own a LangGraph support agent that reads runbooks and fixes problems for 5,000+ people, on top of Java and Python microservices I also maintain.",
+    "I build agents that do real work. I built a LangGraph support agent that reads runbooks and fixes problems for 5,000+ people, backed by Java and Python microservices.",
 };
 
 export const experience = [
@@ -65,13 +67,13 @@ export const projects = [
 export const skills = [
   {
     group: "AI & agents",
-    note: "What I use to build the Workday support agent and my side projects.",
-    items: ["LangGraph", "LangChain", "LangSmith", "Spring AI", "MCP", "RAG", "ReAct agents", "LLM evals", "Claude on Bedrock", "OpenSearch vector search"],
+    note: "What I use to build agents that people rely on.",
+    items: ["LangGraph", "LangGraph4j", "LangChain", "LangSmith", "Spring AI", "MCP", "RAG", "ReAct agents", "LLM evals", "Prompt engineering", "Claude on Bedrock", "OpenSearch vector search"],
   },
   {
     group: "Backend",
     note: "Services that stay up under load.",
-    items: ["Java", "Spring Boot", "Python", "FastAPI", "Kafka", "Microservices", "REST APIs", "Elasticsearch", "Node.js"],
+    items: ["Java", "Spring Boot", "Spring Data JPA", "Spring Batch", "Python", "FastAPI", "Kafka", "Event-driven systems", "Microservices", "REST APIs", "EhCache", "Elasticsearch", "Node.js", "JUnit", "Mockito"],
   },
   {
     group: "Frontend",
@@ -81,19 +83,19 @@ export const skills = [
   {
     group: "Data",
     note: "Relational first, NoSQL when it fits.",
-    items: ["PostgreSQL", "MySQL", "Oracle SQL", "PL/SQL", "MongoDB", "DynamoDB"],
+    items: ["PostgreSQL", "MySQL", "Oracle SQL", "PL/SQL", "MongoDB", "DynamoDB", "AWS RDS"],
   },
   {
     group: "Cloud & DevOps",
     note: "Shipping and running it.",
-    items: ["AWS", "GCP", "Azure", "Docker", "Kubernetes", "Helm", "Jenkins", "CI/CD", "Grafana"],
+    items: ["AWS (EC2, S3, DynamoDB, Bedrock)", "GCP", "Azure", "Docker", "Kubernetes", "Helm", "Jenkins", "Maven", "Git", "CI/CD", "Grafana", "ELK", "Micrometer", "OpenTelemetry"],
   },
 ];
 
 export const facts = [
   ["Role", "SDE 2, Full Stack & AI Engineer at Workday"],
   ["Focus", "AI agents, MCP servers, microservices"],
-  ["Stack", "Java, Python, TypeScript, React, Angular"],
+  ["Stack", "Java, Spring Boot, Python, FastAPI, LangGraph, LangSmith, TypeScript, React, Angular"],
   ["Experience", "Nearly 5 years"],
   ["Location", "Chennai, India"],
 ];

@@ -326,7 +326,7 @@ function CopyEmail() {
     <button
       type="button"
       onClick={copy}
-      className="rounded-full bg-[var(--bone)] text-black px-4 py-2 text-sm font-medium hover:bg-[var(--signal)] transition-colors"
+      className="rounded-full border border-[var(--panel-edge)] px-4 py-2 text-sm hover:border-[var(--bone)] transition-colors"
     >
       {copied ? "Email copied" : "Copy email"}
     </button>
@@ -346,11 +346,19 @@ export default function Home() {
         className="pt-12 md:pt-20 grid md:grid-cols-[1.4fr_1fr] gap-10 md:gap-16"
       >
         <div>
+          <p className="text-[13px] text-[var(--ash)] mb-3">Java Full Stack &amp; AI Engineer</p>
           <h1 className="title text-[2.3rem] md:text-[3.4rem]">
             Hey, I&apos;m Pragadeesh. I build AI agents and the software around them.
           </h1>
           <p className="mt-5 text-[var(--ash)] max-w-xl">{profile.intro}</p>
           <div className="mt-6 flex flex-wrap gap-2">
+            <a
+              href={`tel:${profile.phone}`}
+              aria-label={`Call ${profile.phoneLabel}`}
+              className="rounded-full bg-[var(--bone)] text-black px-4 py-2 text-sm font-medium hover:bg-[var(--signal)] transition-colors"
+            >
+              Call me
+            </a>
             <CopyEmail />
             <a href={profile.github} target="_blank" rel="noreferrer" className="rounded-full border border-[var(--panel-edge)] px-4 py-2 text-sm hover:border-[var(--bone)] transition-colors">
               GitHub
