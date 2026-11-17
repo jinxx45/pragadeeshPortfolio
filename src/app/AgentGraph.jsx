@@ -193,14 +193,14 @@ function Graph({ count, reduced }) {
   );
 }
 
-export default function AgentGraph() {
+export default function AgentGraph({ compact = false }) {
   const reduced =
     typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const small = typeof window !== "undefined" && window.innerWidth < 768;
+  const small = compact || (typeof window !== "undefined" && window.innerWidth < 768);
 
   return (
     <Canvas
-      camera={{ position: [0, 0, small ? 7.2 : 6], fov: 45 }}
+      camera={{ position: [0, 0, small ? 7 : 6], fov: 45 }}
       dpr={[1, 2]}
       gl={{ antialias: true, alpha: true }}
       aria-hidden="true"
