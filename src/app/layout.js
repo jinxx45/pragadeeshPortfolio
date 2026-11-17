@@ -1,6 +1,4 @@
-import "@fontsource-variable/bricolage-grotesque/standard.css";
-import "@fontsource/ibm-plex-sans/400.css";
-import "@fontsource/ibm-plex-sans/500.css";
+import { GeistSans } from "geist/font/sans";
 import "./globals.css";
 
 export const metadata = {
@@ -11,7 +9,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
+    <html lang="en" className={GeistSans.variable}>
       <body>{children}</body>
     </html>
   );
