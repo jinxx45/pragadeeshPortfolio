@@ -61,3 +61,13 @@ body {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Phones: the whole site fits one screen, so lock page scrolling and bounce */
+@media (max-width: 767px) {
+  html,
+  body {
+    height: 100%;
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+}
