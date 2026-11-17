@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { profile, experience, projects, skills, facts } from "./data";
 
@@ -90,38 +90,27 @@ const categories = [
 
 /* ---------- Swipeable deck ---------- */
 
-// On phones the deck fills whatever height is left on screen, so the page never scrolls.
-function useCardSize(ref) {
+function useCardSize() {
   const [size, setSize] = useState({ w: 400, h: 460, gap: 250 });
   useEffect(() => {
     const fit = () => {
       const vw = window.innerWidth;
-      const mobile = vw < 768;
+      const vh = window.innerHeight;
       const w = Math.min(420, vw * 0.84);
-      let h = Math.min(480, Math.max(380, window.innerHeight * 0.5));
-      if (mobile && ref.current) {
-        const controls = 64; // arrows + dots row
-        h = Math.max(260, Math.min(480, ref.current.clientHeight - controls - 16));
-      }
-      setSize({ w, h, gap: mobile ? w * 0.9 : w * 0.62 });
+      const h = Math.min(480, Math.max(380, vh * 0.5));
+      setSize({ w, h, gap: vw < 768 ? w * 0.9 : w * 0.62 });
     };
     fit();
-    const ro = new ResizeObserver(fit);
-    if (ref.current) ro.observe(ref.current);
     window.addEventListener("resize", fit);
-    return () => {
-      ro.disconnect();
-      window.removeEventListener("resize", fit);
-    };
-  }, [ref]);
+    return () => window.removeEventListener("resize", fit);
+  }, []);
   return size;
 }
 
 function Deck({ category }) {
   const [index, setIndex] = useState(0);
   const reduce = useReducedMotion();
-  const box = useRef(null);
-  const { w, h, gap } = useCardSize(box);
+  const { w, h, gap } = useCardSize();
   const panels = category.panels;
   const last = panels.length - 1;
   const go = useCallback((i) => setIndex(Math.max(0, Math.min(last, i))), [last]);
@@ -142,9 +131,9 @@ function Deck({ category }) {
   };
 
   return (
-    <div ref={box} aria-roledescription="carousel" aria-label={category.name} className="h-full flex flex-col justify-center">
+    <div aria-roledescription="carousel" aria-label={category.name}>
       {/* touch-action: none keeps a horizontal swipe from scrolling the page */}
-      <div className="relative select-none shrink-0" style={{ height: h + 16, perspective: 1400 }}>
+      <div className="relative select-none" style={{ height: h + 30, perspective: 1400 }}>
         <motion.div
           className="absolute inset-0 cursor-grab active:cursor-grabbing"
           style={{ touchAction: "none" }}
@@ -167,7 +156,7 @@ function Deck({ category }) {
                 aria-hidden={d !== 0}
                 inert={d !== 0 ? "" : undefined}
                 onClick={() => d !== 0 && go(i)}
-                className="absolute top-2 left-1/2 rounded-[22px] bg-[var(--panel)] border border-[var(--panel-edge)] overflow-hidden shadow-[0_30px_80px_-20px_rgba(0,0,0,0.9)]"
+                className="absolute top-3 left-1/2 rounded-[22px] bg-[var(--panel)] border border-[var(--panel-edge)] overflow-hidden shadow-[0_30px_80px_-20px_rgba(0,0,0,0.9)]"
                 style={{ width: w, height: h, marginLeft: -w / 2, zIndex: 100 - abs, pointerEvents: hidden ? "none" : "auto" }}
                 initial={reduce ? false : { opacity: 0, x: d * gap + 60 }}
                 animate={{
@@ -185,7 +174,7 @@ function Deck({ category }) {
         </motion.div>
       </div>
 
-      <div className="mt-3 shrink-0 flex items-center justify-center gap-5">
+      <div className="mt-3 flex items-center justify-center gap-5">
         <button
           type="button"
           onClick={() => go(index - 1)}
@@ -249,21 +238,20 @@ export default function Home() {
   const [tab, setTab] = useState(0);
 
   return (
-    <main className="mx-auto w-full max-w-5xl px-6 h-[100svh] md:h-auto flex flex-col overflow-hidden md:overflow-visible pt-[max(2rem,env(safe-area-inset-top))] pb-[max(1.75rem,env(safe-area-inset-bottom))] md:pt-20 md:pb-16">
+    <main className="mx-auto w-full max-w-5xl px-6 pb-16 overflow-x-hidden">
       <motion.header
         initial={reduce ? false : { opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-        className="shrink-0 grid md:grid-cols-[1.4fr_1fr] gap-10 md:gap-16"
+        className="pt-12 md:pt-20 grid md:grid-cols-[1.4fr_1fr] gap-10 md:gap-16"
       >
         <div>
           <h1 className="text-[13px] text-[var(--ash)]">{profile.name}</h1>
-          <p className="title text-[1.75rem] sm:text-[2.3rem] md:text-[3.4rem] mt-2 md:mt-3">
+          <p className="title text-[2.3rem] md:text-[3.4rem] mt-3">
             Hey, I&apos;m Pragadeesh. I build AI agents and the software around them.
           </p>
-          <p className="hidden md:block mt-5 text-[var(--ash)] max-w-xl">{profile.intro}</p>
-          <p className="md:hidden mt-2 text-[13.5px] text-[var(--ash)]">SDE 2 at Workday, Chennai</p>
-          <div className="mt-4 md:mt-6 flex flex-wrap gap-2">
+          <p className="mt-5 text-[var(--ash)] max-w-xl">{profile.intro}</p>
+          <div className="mt-6 flex flex-wrap gap-2">
             <CopyEmail />
             <a href={profile.github} target="_blank" rel="noreferrer" className="rounded-full border border-[var(--panel-edge)] px-4 py-2 text-sm hover:border-[var(--bone)] transition-colors">
               GitHub
@@ -273,7 +261,7 @@ export default function Home() {
             </a>
           </div>
         </div>
-        <dl className="hidden md:block self-end divide-y divide-[var(--panel-edge)] border-y border-[var(--panel-edge)] text-[14px]">
+        <dl className="self-end divide-y divide-[var(--panel-edge)] border-y border-[var(--panel-edge)] text-[14px]">
           {facts.map(([k, v]) => (
             <div key={k} className="grid grid-cols-[6.5rem_1fr] gap-3 py-2.5">
               <dt className="text-[var(--ash)]">{k}</dt>
@@ -283,8 +271,8 @@ export default function Home() {
         </dl>
       </motion.header>
 
-      <section className="flex-1 min-h-0 flex flex-col mt-6 md:mt-20" aria-label="Skills, experience and projects">
-        <div role="tablist" aria-label="Categories" className="shrink-0 flex justify-center">
+      <section className="mt-16 md:mt-20" aria-label="Skills, experience and projects">
+        <div role="tablist" aria-label="Categories" className="flex justify-center">
           <div className="inline-flex rounded-full border border-[var(--panel-edge)] p-1">
             {categories.map((c, i) => (
               <button
@@ -308,11 +296,10 @@ export default function Home() {
           </div>
         </div>
 
-        <div role="tabpanel" aria-label={categories[tab].name} className="flex-1 min-h-0 mt-4 md:mt-8">
+        <div role="tabpanel" aria-label={categories[tab].name} className="mt-8">
           <AnimatePresence mode="wait">
             <motion.div
               key={categories[tab].name}
-              className="h-full"
               initial={reduce ? false : { opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={reduce ? undefined : { opacity: 0 }}
