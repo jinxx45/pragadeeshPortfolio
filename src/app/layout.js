@@ -4,7 +4,7 @@ import "./globals.css";
 export const metadata = {
   title: "Pragadeeshvaran S — Full stack & AI engineer",
   description:
-    "Full stack and AI engineer in Chennai. LangGraph agents, MCP servers and Java/Python microservices at Workday.",
+    "Full stack and AI engineer in Chennai. LangGraph agents, MCP servers and Java/Python microservices.",
 };
 
 export default function RootLayout({ children }) {
