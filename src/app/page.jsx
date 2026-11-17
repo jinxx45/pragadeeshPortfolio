@@ -1,23 +1,57 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { profile, experience, projects, skills, facts } from "./data";
 
+const AgentGraph = dynamic(() => import("./AgentGraph"), { ssr: false });
+
 /* ---------- Panel contents ---------- */
 
-function PanelShell({ kicker, title, sub, children, footer }) {
+// Panels render twice: clipped inside a card, and in full inside the expanded view.
+const PanelMode = createContext({ full: false, onExpand: null });
+
+function ExpandIcon() {
   return (
-    <div className="h-full flex flex-col p-6 md:p-7">
-      <p className="text-[13px] text-[var(--ash)]">{kicker}</p>
-      <h3 className="title text-[1.9rem] md:text-[2.3rem] mt-1 pb-1">{title}</h3>
-      {sub && <p className="text-[var(--ash)] mt-1">{sub}</p>}
-      <div
-        className="mt-5 flex-1 min-h-0 overflow-y-auto overscroll-contain pr-1 text-[14.5px] leading-relaxed"
-        style={{ touchAction: "pan-y" }}
-      >
-        {children}
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <path d="M9.5 2.5h4v4M6.5 13.5h-4v-4M13.5 2.5L9 7M2.5 13.5L7 9" stroke="currentColor" strokeWidth="1.4" />
+    </svg>
+  );
+}
+
+function PanelShell({ kicker, title, sub, children, footer }) {
+  const { full, onExpand } = useContext(PanelMode);
+  return (
+    <div className={`flex flex-col ${full ? "" : "h-full"} p-6 md:p-7`}>
+      <div className="flex items-start justify-between gap-4">
+        <div className="min-w-0">
+          <p className="text-[13px] text-[var(--ash)]">{kicker}</p>
+          <h3 className={`title mt-1 pb-1 ${full ? "text-[2.4rem] md:text-[3rem]" : "text-[1.9rem] md:text-[2.3rem]"}`}>{title}</h3>
+        </div>
+        {!full && onExpand && (
+          <button
+            type="button"
+            onClick={onExpand}
+            aria-label={`Expand ${title}`}
+            className="shrink-0 h-9 w-9 rounded-full border border-[var(--panel-edge)] grid place-items-center text-[var(--ash)] hover:text-[var(--bone)] hover:border-[var(--bone)] transition-colors"
+          >
+            <ExpandIcon />
+          </button>
+        )}
       </div>
+      {sub && <p className="text-[var(--ash)] mt-1">{sub}</p>}
+      <div className={`mt-5 text-[14.5px] leading-relaxed ${full ? "md:text-[15.5px]" : "relative flex-1 min-h-0 overflow-hidden"}`}>
+        {children}
+        {!full && (
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[var(--panel)] to-transparent" aria-hidden="true" />
+        )}
+      </div>
+      {!full && onExpand && (
+        <button type="button" onClick={onExpand} className="mt-3 self-start text-sm link text-[var(--ash)]">
+          Read more
+        </button>
+      )}
       {footer && <div className="pt-5">{footer}</div>}
     </div>
   );
@@ -107,8 +141,64 @@ function useCardSize() {
   return size;
 }
 
+/* Full view of one panel: whole screen on phones, a large sheet on desktop */
+function ExpandedPanel({ panel, onClose }) {
+  const reduce = useReducedMotion();
+  const closeRef = useRef(null);
+  useEffect(() => {
+    const prev = document.activeElement;
+    closeRef.current?.focus();
+    const onKey = (e) => e.key === "Escape" && onClose();
+    window.addEventListener("keydown", onKey);
+    const overflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = overflow;
+      prev?.focus?.();
+    };
+  }, [onClose]);
+
+  return (
+    <motion.div
+      className="fixed inset-0 z-50 md:grid md:place-items-center md:p-8"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: reduce ? 0 : 0.2 }}
+    >
+      <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onClose} aria-hidden="true" />
+      <motion.div
+        role="dialog"
+        aria-modal="true"
+        aria-label={panel.key}
+        className="relative h-full w-full md:h-auto md:max-h-[86vh] md:max-w-2xl overflow-y-auto overscroll-contain bg-[var(--panel)] md:rounded-[26px] md:border md:border-[var(--panel-edge)] pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]"
+        initial={reduce ? false : { y: 40, scale: 0.97, opacity: 0 }}
+        animate={{ y: 0, scale: 1, opacity: 1 }}
+        exit={reduce ? undefined : { y: 30, scale: 0.98, opacity: 0 }}
+        transition={{ type: "spring", stiffness: 320, damping: 32 }}
+      >
+        <div className="sticky top-0 z-10 flex justify-end p-4 -mb-[4.5rem] pointer-events-none">
+          <button
+            ref={closeRef}
+            type="button"
+            onClick={onClose}
+            aria-label="Close"
+            className="pointer-events-auto h-10 w-10 rounded-full bg-[var(--ink)]/70 border border-[var(--panel-edge)] grid place-items-center hover:border-[var(--bone)] transition-colors"
+          >
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2 2l10 10M12 2L2 12" stroke="currentColor" strokeWidth="1.5" /></svg>
+          </button>
+        </div>
+        <PanelMode.Provider value={{ full: true, onExpand: null }}>{panel.node}</PanelMode.Provider>
+      </motion.div>
+    </motion.div>
+  );
+}
+
 function Deck({ category }) {
   const [index, setIndex] = useState(0);
+  const [openKey, setOpenKey] = useState(null);
+  const closeExpanded = useCallback(() => setOpenKey(null), []);
   const reduce = useReducedMotion();
   const { w, h, gap } = useCardSize();
   const panels = category.panels;
@@ -117,12 +207,13 @@ function Deck({ category }) {
 
   useEffect(() => {
     const onKey = (e) => {
+      if (openKey) return;
       if (e.key === "ArrowRight") go(index + 1);
       if (e.key === "ArrowLeft") go(index - 1);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [index, go]);
+  }, [index, go, openKey]);
 
   const onDragEnd = (_, info) => {
     const swipe = info.offset.x + info.velocity.x * 0.2;
@@ -167,7 +258,11 @@ function Deck({ category }) {
                 }}
                 transition={reduce ? { duration: 0 } : { type: "spring", stiffness: 260, damping: 32 }}
               >
-                {abs <= 2 && panel.node}
+                {abs <= 2 && (
+                  <PanelMode.Provider value={{ full: false, onExpand: d === 0 ? () => setOpenKey(panel.key) : null }}>
+                    {panel.node}
+                  </PanelMode.Provider>
+                )}
               </motion.article>
             );
           })}
@@ -205,6 +300,11 @@ function Deck({ category }) {
       <p aria-live="polite" className="sr-only">
         {panels[index].key}, {index + 1} of {panels.length}
       </p>
+      <AnimatePresence>
+        {openKey && (
+          <ExpandedPanel panel={panels.find((p) => p.key === openKey)} onClose={closeExpanded} />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
@@ -246,10 +346,9 @@ export default function Home() {
         className="pt-12 md:pt-20 grid md:grid-cols-[1.4fr_1fr] gap-10 md:gap-16"
       >
         <div>
-          <h1 className="text-[13px] text-[var(--ash)]">{profile.name}</h1>
-          <p className="title text-[2.3rem] md:text-[3.4rem] mt-3">
+          <h1 className="title text-[2.3rem] md:text-[3.4rem]">
             Hey, I&apos;m Pragadeesh. I build AI agents and the software around them.
-          </p>
+          </h1>
           <p className="mt-5 text-[var(--ash)] max-w-xl">{profile.intro}</p>
           <div className="mt-6 flex flex-wrap gap-2">
             <CopyEmail />
@@ -261,7 +360,14 @@ export default function Home() {
             </a>
           </div>
         </div>
-        <dl className="self-end divide-y divide-[var(--panel-edge)] border-y border-[var(--panel-edge)] text-[14px]">
+        <div className="self-end">
+          <figure className="relative h-60 md:h-80 -mx-6 md:mx-0 md:-mt-10">
+            <AgentGraph compact />
+            <figcaption className="absolute bottom-1 right-6 md:right-0 text-[12px] text-[var(--ash)]">
+              Each amber dot is a tool call moving between services
+            </figcaption>
+          </figure>
+        <dl className="divide-y divide-[var(--panel-edge)] border-y border-[var(--panel-edge)] text-[14px]">
           {facts.map(([k, v]) => (
             <div key={k} className="grid grid-cols-[6.5rem_1fr] gap-3 py-2.5">
               <dt className="text-[var(--ash)]">{k}</dt>
@@ -269,6 +375,7 @@ export default function Home() {
             </div>
           ))}
         </dl>
+        </div>
       </motion.header>
 
       <section className="mt-16 md:mt-20" aria-label="Skills, experience and projects">
