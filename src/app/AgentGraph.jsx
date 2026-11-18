@@ -1,7 +1,7 @@
 "use client";
 
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { useEffect, useMemo, useRef } from "react";
+import { Canvas, useFrame } from "@react-three/fiber";
+import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 
 const BONE = new THREE.Color("#e9e5dc");
@@ -70,14 +70,15 @@ function makeGlowTexture() {
   return new THREE.CanvasTexture(c);
 }
 
-function Graph({ count, reduced }) {
+function Graph({ count, reduced, drag }) {
   const { nodes, edges, adj } = useMemo(() => buildGraph(count), [count]);
   const group = useRef();
   const nodeMesh = useRef();
   const lineGeo = useRef();
   const pulseRefs = useRef([]);
   const glow = useMemo(() => (typeof document !== "undefined" ? makeGlowTexture() : null), []);
-  const { pointer } = useThree();
+  // Spin left over after a drag, in radians per second.
+  const spin = useRef({ x: 0, y: 0 });
 
   // Heat per node: 1 when a signal arrives, decays back to 0.
   const heat = useMemo(() => new Float32Array(nodes.length), [nodes.length]);
@@ -154,11 +155,34 @@ function Graph({ count, reduced }) {
     });
     if (lineGeo.current) lineGeo.current.attributes.position.needsUpdate = true;
 
-    // Slow turn, nudged by the cursor.
-    if (group.current && !reduced) {
-      group.current.rotation.y += delta * 0.06;
-      group.current.rotation.x += (pointer.y * 0.25 - group.current.rotation.x) * 0.04;
-      group.current.rotation.z += (-pointer.x * 0.12 - group.current.rotation.z) * 0.04;
+    // Hold and drag to turn it; let go and it keeps spinning, then settles.
+    const g = group.current;
+    if (g) {
+      const d = drag.current;
+      const step = Math.max(delta, 1 / 120);
+      if (d.dx || d.dy) {
+        const ry = d.dx * 0.009;
+        const rx = d.dy * 0.009;
+        g.rotation.y += ry;
+        g.rotation.x += rx;
+        spin.current.y = spin.current.y * 0.5 + (ry / step) * 0.5;
+        spin.current.x = spin.current.x * 0.5 + (rx / step) * 0.5;
+        d.dx = 0;
+        d.dy = 0;
+      } else if (!d.active) {
+        g.rotation.y += spin.current.y * delta;
+        g.rotation.x += spin.current.x * delta;
+        const decay = Math.exp(-2.5 * delta);
+        spin.current.y *= decay;
+        spin.current.x *= decay;
+        if (!reduced) g.rotation.y += delta * 0.06;
+        // Drift back to a slight tilt after a vertical spin.
+        g.rotation.x += (0.2 - g.rotation.x) * Math.min(1, delta * 0.8) * (Math.abs(spin.current.x) < 0.05 ? 1 : 0);
+      } else {
+        spin.current.x = 0;
+        spin.current.y = 0;
+      }
+      g.rotation.x = Math.max(-1.3, Math.min(1.3, g.rotation.x));
     }
   });
 
@@ -197,15 +221,54 @@ export default function AgentGraph({ compact = false }) {
   const reduced =
     typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const small = compact || (typeof window !== "undefined" && window.innerWidth < 768);
+  const drag = useRef({ active: false, id: null, x: 0, y: 0, dx: 0, dy: 0, touch: false });
+  const [grabbing, setGrabbing] = useState(false);
+
+  const down = (e) => {
+    const d = drag.current;
+    d.active = true;
+    d.id = e.pointerId;
+    d.x = e.clientX;
+    d.y = e.clientY;
+    d.touch = e.pointerType === "touch";
+    setGrabbing(true);
+    e.currentTarget.setPointerCapture?.(e.pointerId);
+  };
+  const move = (e) => {
+    const d = drag.current;
+    if (!d.active || e.pointerId !== d.id) return;
+    d.dx += e.clientX - d.x;
+    d.dy += e.clientY - d.y;
+    d.x = e.clientX;
+    d.y = e.clientY;
+  };
+  const up = (e) => {
+    const d = drag.current;
+    if (e.pointerId !== d.id) return;
+    d.active = false;
+    setGrabbing(false);
+  };
 
   return (
-    <Canvas
-      camera={{ position: [0, 0, compact ? 6.2 : small ? 7 : 6], fov: 45 }}
-      dpr={[1, 2]}
-      gl={{ antialias: true, alpha: true }}
-      aria-hidden="true"
+    <div
+      className={`h-full w-full ${grabbing ? "cursor-grabbing" : "cursor-grab"}`}
+      // Fingers rotate the graph instead of scrolling the page while touching it.
+      style={{ touchAction: "none" }}
+      onPointerDown={down}
+      onPointerMove={move}
+      onPointerUp={up}
+      onPointerCancel={up}
+      onLostPointerCapture={up}
+      title="Drag to spin"
     >
-      <Graph count={small ? 42 : 64} reduced={reduced} />
-    </Canvas>
+      <Canvas
+        camera={{ position: [0, 0, compact ? 6.2 : small ? 7 : 6], fov: 45 }}
+        dpr={[1, 2]}
+        gl={{ antialias: true, alpha: true }}
+        aria-hidden="true"
+      >
+        <Graph count={small ? 42 : 64} reduced={reduced} drag={drag} />
+      </Canvas>
+    </div>
   );
 }
