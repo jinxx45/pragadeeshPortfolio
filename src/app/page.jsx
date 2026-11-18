@@ -369,10 +369,10 @@ export default function Home() {
           </div>
         </div>
         <div className="self-end">
-          <figure className="relative h-60 md:h-80 -mx-6 md:mx-0 md:-mt-10">
+          <figure className="relative h-64 md:h-80 -mx-6 md:mx-0 mb-8 md:mb-0 md:-mt-10">
             <AgentGraph compact />
-            <figcaption className="absolute bottom-1 right-6 md:right-0 text-[12px] text-[var(--ash)]">
-              Each amber dot is a tool call moving between services
+            <figcaption className="absolute bottom-1 inset-x-6 md:inset-x-0 text-right text-[12px] text-[var(--ash)] pointer-events-none">
+              Drag to spin it. Amber dots are tool calls between services.
             </figcaption>
           </figure>
         <dl className="divide-y divide-[var(--panel-edge)] border-y border-[var(--panel-edge)] text-[14px]">
